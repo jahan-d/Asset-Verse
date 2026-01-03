@@ -67,7 +67,7 @@ const AllRequests = () => {
                                     </td>
                                     <td>
                                         <div className={`badge ${req.requestStatus === 'pending' ? 'badge-warning' :
-                                                req.requestStatus === 'approved' ? 'badge-success' : 'badge-error'
+                                            req.requestStatus === 'approved' ? 'badge-success' : 'badge-error'
                                             } badge-outline capitalize`}>
                                             {req.requestStatus}
                                         </div>
