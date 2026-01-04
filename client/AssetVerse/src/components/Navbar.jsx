@@ -92,7 +92,10 @@ const Navbar = () => {
                                     <span className="badge">New</span>
                                 </Link>
                             </li>
-                            {/* TODO: Add role based links explicitly here or let Dashboard handle it */}
+                            {/* Role-based dashboard quick-links */}
+                            {dbUser?.role === 'hr' && (
+                                <li><Link to="/hr/upgrade">My Subscription</Link></li>
+                            )}
                             <li><button onClick={handleLogout}>Logout</button></li>
                         </ul>
                     </div>

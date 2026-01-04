@@ -257,6 +257,11 @@ app.patch("/api/requests/:id", verifyJWT, requireRole('hr'), async (req, res) =>
                 affiliationDate: new Date(),
                 status: "active"
             });
+            // Update HR's employee count
+            await usersCollection.updateOne(
+                { email: request.hrEmail },
+                { $inc: { currentEmployees: 1 } }
+            );
         }
     }
     res.send(result);
@@ -296,6 +301,15 @@ app.delete("/api/hr/employees/:id", verifyJWT, requireRole("hr"), async (req, re
     const userToRemove = await usersCollection.findOne({ _id: new ObjectId(req.params.id) });
     if (!userToRemove) return res.status(404).send({ message: "User not found" });
     const deleteResult = await employeeAffiliationsCollection.deleteOne({ employeeEmail: userToRemove.email, hrEmail: req.decoded.email });
+
+    if (deleteResult.deletedCount > 0) {
+        // Update HR's employee count
+        await usersCollection.updateOne(
+            { email: req.decoded.email },
+            { $inc: { currentEmployees: -1 } }
+        );
+    }
+
     const requests = await requestsCollection.find({ requesterEmail: userToRemove.email, hrEmail: req.decoded.email, requestStatus: "approved" }).toArray();
     for (const r of requests) {
         await assetsCollection.updateOne({ _id: r.assetId }, { $inc: { availableQuantity: 1 } });
@@ -310,24 +324,83 @@ app.get("/api/packages", async (req, res) => {
 });
 
 app.post("/create-checkout-session", verifyJWT, requireRole("hr"), async (req, res) => {
-    const targetPackage = await packagesCollection.findOne({ _id: new ObjectId(req.body.packageId) });
+    const packageId = req.body.packageId;
+    const targetPackage = await packagesCollection.findOne({ _id: new ObjectId(packageId) });
     if (!targetPackage) return res.status(404).send({ message: "Package not found" });
+
+    const origin = req.headers.origin || process.env.CLIENT_URL || "http://localhost:5173";
+
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         customer_email: req.decoded.email,
         line_items: [{
             price_data: {
                 currency: "usd",
-                product_data: { name: `AssetVerse ${targetPackage.name} Package` },
+                product_data: {
+                    name: `AssetVerse ${targetPackage.name} Package`,
+                    description: `Limit: ${targetPackage.employeeLimit} Employees`
+                },
                 unit_amount: targetPackage.price * 100,
             },
             quantity: 1,
         }],
         mode: "payment",
-        success_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/hr/upgrade?success=true&pkg=${req.body.packageId}`,
-        cancel_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/hr/upgrade?canceled=true`,
+        metadata: {
+            packageId: packageId,
+            userEmail: req.decoded.email
+        },
+        success_url: `${origin}/hr/upgrade?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/hr/upgrade?canceled=true`,
     });
     res.send({ url: session.url });
+});
+
+app.post("/api/payments/verify", verifyJWT, async (req, res) => {
+    const { session_id } = req.body;
+    if (!session_id) return res.status(400).send({ message: "No session ID provided" });
+
+    try {
+        const session = await stripe.checkout.sessions.retrieve(session_id);
+
+        if (session.payment_status === 'paid') {
+            const { packageId, userEmail } = session.metadata;
+            const targetPackage = await packagesCollection.findOne({ _id: new ObjectId(packageId) });
+
+            if (!targetPackage) return res.status(404).send({ message: "Package not found" });
+
+            // Update User Subscription and Limit
+            const updateResult = await usersCollection.updateOne(
+                { email: userEmail },
+                {
+                    $set: {
+                        packageLimit: targetPackage.employeeLimit,
+                        subscription: targetPackage.name.toLowerCase()
+                    }
+                }
+            );
+
+            // Log Payment
+            await paymentsCollection.insertOne({
+                userEmail,
+                packageId: new ObjectId(packageId),
+                packageName: targetPackage.name,
+                amount: targetPackage.price,
+                stripeSessionId: session_id,
+                date: new Date()
+            });
+
+            res.send({
+                success: true,
+                message: "Payment verified and account upgraded",
+                package: targetPackage
+            });
+        } else {
+            res.status(400).send({ message: "Payment not completed" });
+        }
+    } catch (error) {
+        console.error("Verification Error:", error);
+        res.status(500).send({ message: "Verification failed" });
+    }
 });
 
 async function run() {

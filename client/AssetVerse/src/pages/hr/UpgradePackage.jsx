@@ -3,23 +3,40 @@ import useAxiosSecure from "../../hooks/useAxiosSecure";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../../contexts/AuthProvider";
 
 const UpgradePackage = () => {
     const axiosSecure = useAxiosSecure();
     const [searchParams, setSearchParams] = useSearchParams();
+    const { refreshProfile } = useAuth();
 
     // Handle Payment Return
     useEffect(() => {
-        if (searchParams.get("success")) {
-            toast.success("Payment Successful! Package Upgraded.");
-            // Ideally call backend to verify/update DB if webhook missed, but stripe session handles it mostly
-            // Or backend hook should have done it.
-            // For this project scope, usually we assume webhook worked or confirm here.
+        const sessionId = searchParams.get("session_id");
+        if (searchParams.get("success") && sessionId) {
+            const verifyPayment = async () => {
+                const loadingToast = toast.loading("Verifying your payment...");
+                try {
+                    const res = await axiosSecure.post("/api/payments/verify", { session_id: sessionId });
+                    if (res.data.success) {
+                        toast.success("Payment Verified! Account Upgraded.", { id: loadingToast });
+                        // Refresh user profile to show updated package limits
+                        await refreshProfile();
+                        // Clear search params to prevent re-verification on refresh
+                        setSearchParams({});
+                    }
+                } catch (error) {
+                    console.error(error);
+                    toast.error("Verification failed. Please contact support.", { id: loadingToast });
+                }
+            };
+            verifyPayment();
         }
         if (searchParams.get("canceled")) {
             toast.error("Payment Cancelled.");
+            setSearchParams({});
         }
-    }, [searchParams]);
+    }, [searchParams, axiosSecure, setSearchParams, refreshProfile]);
 
 
     const { data: packages = [] } = useQuery({
@@ -33,7 +50,9 @@ const UpgradePackage = () => {
     const handleUpgrade = async (packageId) => {
         try {
             const res = await axiosSecure.post("/create-checkout-session", { packageId });
-            window.location.href = res.data.url;
+            if (res.data.url) {
+                window.location.href = res.data.url;
+            }
         } catch (error) {
             console.error(error);
             toast.error("Failed to initiate payment");

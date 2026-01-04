@@ -67,6 +67,19 @@ const AuthProvider = ({ children }) => {
         return signOut(auth);
     };
 
+    const refreshProfile = async () => {
+        if (!user) return;
+        try {
+            const token = localStorage.getItem("access-token");
+            const profileRes = await axios.get(`${API_URL}/api/users/profile`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setDbUser(profileRes.data);
+        } catch (err) {
+            console.error("Profile Refresh Failed", err);
+        }
+    };
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
@@ -103,7 +116,8 @@ const AuthProvider = ({ children }) => {
         loading,
         createUser,
         loginUser,
-        logoutUser
+        logoutUser,
+        refreshProfile
     };
 
     return (

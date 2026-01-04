@@ -55,12 +55,20 @@ const Profile = () => {
                                 </div>
                             )}
                             {dbUser?.role === 'hr' && (
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text">Packge Limit</span>
-                                    </label>
-                                    <input type="text" value={`${dbUser.packageLimit || 5} Employees`} readOnly className="input input-bordered" />
-                                </div>
+                                <>
+                                    <div className="form-control">
+                                        <label className="label">
+                                            <span className="label-text">Team Size</span>
+                                        </label>
+                                        <input type="text" value={`${dbUser.currentEmployees || 0} / ${dbUser.packageLimit || 5} Employees`} readOnly className="input input-bordered" />
+                                    </div>
+                                    <div className="form-control">
+                                        <label className="label">
+                                            <span className="label-text">Subscription</span>
+                                        </label>
+                                        <input type="text" value={dbUser.subscription || "Basic"} readOnly className="input input-bordered capitalize" />
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
