@@ -2,11 +2,11 @@
 
 <div align="center">
 
-![AssetVerse Logo](https://asset-verse-demo.web.app/logo.png)
+![AssetVerse Logo](https://assetverse-16573.web.app/logo.png)
 
 **A modern, full-stack employee asset management platform for HR professionals**
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://asset-verse-demo.web.app)
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://assetverse-16573.web.app/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 [Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Screenshots](#screenshots)
@@ -125,18 +125,15 @@ npm run dev
 
 ## 📸 Screenshots
 
-<!-- Add your screenshots here -->
-### Home Dashboard
-![Home Dashboard](./screenshots/home.png)
+![AssetVerse Home Dashboard](./screenshots/home.png)
 
-### Package Upgrade
-![Package Management](./screenshots/packages.png)
+> **See the live application**: Visit [https://assetverse-16573.web.app/](https://assetverse-16573.web.app/) to see AssetVerse in action!
 
-### Asset Management
-![Asset Management](./screenshots/assets.png)
-
-### Team Management
-![Team Management](./screenshots/team.png)
+The application features:
+- Modern dashboard with employee stats and package limits
+- Asset management interface with request tracking
+- Team management with real-time updates
+- Stripe payment integration for package upgrades
 
 ---
 
