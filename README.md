@@ -181,7 +181,7 @@ The application features:
 
 **Jahan**
 - Portfolio: [jahan-d.web.app](https://jahan-d.web.app)
-- GitHub: [@yourusername](https://github.com/yourusername)
+- GitHub: [@yourusername](https://github.com/jahan-d)
 
 ---
 
