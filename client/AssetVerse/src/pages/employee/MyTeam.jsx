@@ -8,7 +8,7 @@ const MyTeam = () => {
         queryKey: ['my-team'],
         queryFn: async () => {
             const res = await axiosSecure.get('/api/my-team');
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         }
     });
 
@@ -33,7 +33,7 @@ const MyTeam = () => {
                         🎂 Upcoming Birthdays
                     </h3>
                     <div className="flex flex-wrap gap-4">
-                        {upcomingBirthdays.map(member => (
+                        {(Array.isArray(upcomingBirthdays) ? upcomingBirthdays : []).map(member => (
                             <div key={member._id} className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm">
                                 <div className="avatar">
                                     <div className="w-10 h-10 rounded-full">
@@ -54,7 +54,7 @@ const MyTeam = () => {
 
             {/* Team Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {teamMembers.map(member => (
+                {(Array.isArray(teamMembers) ? teamMembers : []).map(member => (
                     <div key={member._id} className="card bg-base-100 shadow-xl border">
                         <figure className="px-10 pt-10">
                             <div className="avatar">

@@ -9,7 +9,7 @@ const MyEmployeeList = () => {
         queryKey: ['hr-employees'],
         queryFn: async () => {
             const res = await axiosSecure.get('/api/hr/employees');
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         }
     });
 
@@ -46,7 +46,7 @@ const MyEmployeeList = () => {
                         {employees.length === 0 ? (
                             <tr><td colSpan="5" className="text-center p-6">No employees found.</td></tr>
                         ) : (
-                            employees.map(emp => (
+                            (Array.isArray(employees) ? employees : []).map(emp => (
                                 <tr key={emp._id}>
                                     <td>
                                         <div className="flex items-center gap-3">

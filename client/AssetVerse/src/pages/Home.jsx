@@ -13,7 +13,8 @@ const DashboardSummary = () => {
         queryKey: ['hr-pending-stats'],
         queryFn: async () => {
             const res = await axiosSecure.get('/api/requests');
-            return res.data.filter(r => r.requestStatus === 'pending');
+            const data = Array.isArray(res.data) ? res.data : [];
+            return data.filter(r => r.requestStatus === 'pending');
         },
         enabled: !!user && dbUser?.role === 'hr'
     });
@@ -23,7 +24,7 @@ const DashboardSummary = () => {
         queryKey: ['hr-employee-count'],
         queryFn: async () => {
             const res = await axiosSecure.get('/api/hr/employees');
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         },
         enabled: !!user && dbUser?.role === 'hr'
     });
@@ -32,7 +33,7 @@ const DashboardSummary = () => {
         queryKey: ['employee-asset-stats'],
         queryFn: async () => {
             const res = await axiosSecure.get('/api/my-assets');
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         },
         enabled: !!user && dbUser?.role === 'employee'
     });
@@ -98,7 +99,7 @@ const Home = () => {
         queryKey: ['packages'],
         queryFn: async () => {
             const res = await axiosPublic.get('/api/packages');
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         }
     });
 
@@ -208,14 +209,14 @@ const Home = () => {
                     <div className="text-center"><span className="loading loading-spinner loading-lg text-primary"></span></div>
                 ) : (
                     <div className="grid md:grid-cols-3 gap-8">
-                        {packages.map((pkg) => (
+                        {(Array.isArray(packages) ? packages : []).map((pkg) => (
                             <div key={pkg._id} className="card bg-base-100 shadow-xl border hover:border-primary transition-all">
                                 <div className="card-body items-center text-center">
                                     <h2 className="card-title text-2xl">{pkg.name}</h2>
                                     <p className="text-4xl font-bold text-primary my-4">${pkg.price}</p>
                                     <p className="text-sm font-semibold text-gray-500 mb-4">Up to {pkg.employeeLimit} Employees</p>
                                     <ul className="space-y-2 mb-6 text-left w-full pl-4">
-                                        {pkg.features?.map((feature, idx) => (
+                                        {(Array.isArray(pkg.features) ? pkg.features : []).map((feature, idx) => (
                                             <li key={idx} className="flex items-center gap-2">
                                                 <span className="text-green-500">✔</span> {feature}
                                             </li>

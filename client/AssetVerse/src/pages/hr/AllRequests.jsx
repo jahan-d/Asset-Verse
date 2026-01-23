@@ -9,7 +9,7 @@ const AllRequests = () => {
         queryKey: ['hr-requests'],
         queryFn: async () => {
             const res = await axiosSecure.get('/api/requests');
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         }
     });
 
@@ -50,7 +50,7 @@ const AllRequests = () => {
                         {requests.length === 0 ? (
                             <tr><td colSpan="6" className="text-center">No requests found.</td></tr>
                         ) : (
-                            requests.map(req => (
+                            (Array.isArray(requests) ? requests : []).map(req => (
                                 <tr key={req._id}>
                                     <td>
                                         <div className="flex flex-col">

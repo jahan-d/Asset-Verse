@@ -11,10 +11,9 @@ const RequestAsset = () => {
     const { data: assets = [], isLoading } = useQuery({
         queryKey: ['request-assets', search],
         queryFn: async () => {
-            // Need to filter ONLY assets with quantity > 0 ? Docs say "show all assets... quantity > 0"
-            // And maybe a general search
             const res = await axiosSecure.get(`/api/assets?search=${search}&available=true`);
-            return res.data.filter(a => a.availableQuantity > 0); // Client side filter double check
+            const data = Array.isArray(res.data) ? res.data : [];
+            return data.filter(a => a.availableQuantity > 0);
         }
     });
 
@@ -59,7 +58,7 @@ const RequestAsset = () => {
                 <div className="text-center"><span className="loading loading-bars loading-lg"></span></div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {assets.map(asset => (
+                    {(Array.isArray(assets) ? assets : []).map(asset => (
                         <div key={asset._id} className="card bg-base-100 shadow-xl border">
                             <figure className="px-4 pt-4">
                                 <img src={asset.productImage} alt={asset.productName} className="rounded-xl h-48 object-cover w-full" />

@@ -43,7 +43,7 @@ const UpgradePackage = () => {
         queryKey: ['packages-upgrade'],
         queryFn: async () => {
             const res = await axiosSecure.get('/api/packages');
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         }
     });
 
@@ -65,15 +65,15 @@ const UpgradePackage = () => {
             <p className="mb-10 text-gray-500">Increase your employee limit to scale your business.</p>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                {packages.map((pkg) => (
-                    <div key={pkg._id} className="card bg-base-100 shadow-2xl border-2 border-transparent hover:border-primary transition-all">
+                {(Array.isArray(packages) ? packages : []).map((pkg) => (
+                    <div key={pkg._id} className="card bg-base-100 shadow-xl border-2 border-transparent hover:border-primary transition-all">
                         <div className="card-body">
                             <h2 className="card-title justify-center text-3xl">{pkg.name}</h2>
                             <p className="text-5xl font-bold text-primary my-4">${pkg.price}</p>
                             <p className="font-semibold text-gray-500">Up to {pkg.employeeLimit} Employees</p>
                             <div className="divider"></div>
                             <ul className="text-left space-y-2 mb-6">
-                                {pkg.features?.map((f, i) => (
+                                {(Array.isArray(pkg.features) ? pkg.features : []).map((f, i) => (
                                     <li key={i} className="flex gap-2"><span className="text-green-500">✔</span> {f}</li>
                                 ))}
                             </ul>

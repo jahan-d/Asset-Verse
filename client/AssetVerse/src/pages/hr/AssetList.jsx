@@ -16,7 +16,7 @@ const AssetList = () => {
             if (search) params.append('search', search);
             // Backend filtering need implementation details, for now we filter client side or basic backend search
             const res = await axiosSecure.get(`/api/assets?${params.toString()}`);
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         }
     });
 
@@ -83,7 +83,7 @@ const AssetList = () => {
                         {filteredAssets.length === 0 ? (
                             <tr><td colSpan="5" className="text-center p-4">No assets found.</td></tr>
                         ) : (
-                            filteredAssets.map(asset => (
+                            (Array.isArray(filteredAssets) ? filteredAssets : []).map(asset => (
                                 <tr key={asset._id}>
                                     <td>
                                         <div className="flex items-center gap-3">

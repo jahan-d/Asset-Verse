@@ -12,7 +12,7 @@ const MyAssets = () => {
         queryKey: ['my-assets', search, filter],
         queryFn: async () => {
             const res = await axiosSecure.get(`/api/my-assets?search=${search}&type=${filter}`);
-            return res.data;
+            return Array.isArray(res.data) ? res.data : [];
         }
     });
 
@@ -77,7 +77,7 @@ const MyAssets = () => {
                         {myAssets.length === 0 ? (
                             <tr><td colSpan="6" className="text-center">No assets found.</td></tr>
                         ) : (
-                            myAssets.map(item => (
+                            (Array.isArray(myAssets) ? myAssets : []).map(item => (
                                 <tr key={item._id}>
                                     <td>
                                         <div className="flex items-center gap-3">
